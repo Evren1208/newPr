@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Dict, Optional
@@ -19,7 +20,7 @@ class AiProvider(ABC):
 
 
 class OpenAICompatibleProvider(AiProvider):
-    """Generic provider for OpenAI-compatible APIs such as Qwen/DeepSeek gateways."""
+    """Generic provider for OpenAI-compatible APIs (e.g. Qwen/DeepSeek gateways)."""
 
     def __init__(self, base_url: str, api_key: str, model: str, timeout: int = 45):
         self.base_url = base_url.rstrip("/")
@@ -62,6 +63,8 @@ class OfflineTemplateProvider(AiProvider):
 
 
 def _project_root() -> Path:
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).resolve().parent
     return Path(__file__).resolve().parents[1]
 
 

@@ -10,12 +10,15 @@ Unicode true
 
 Name "${APP_NAME}"
 OutFile "..\installer-output\ClassTeacherToolbox-Setup-V0.2.exe"
+
+; 默认给一个普通用户可写目录，但安装时始终显示目录选择页，用户可点击“浏览”自选。
 InstallDir "$LOCALAPPDATA\Programs\ClassTeacherToolbox"
-InstallDirRegKey HKCU "Software\ClassTeacherToolbox" "InstallDir"
 RequestExecutionLevel user
 SetCompressor /SOLID lzma
 ShowInstDetails show
 ShowUninstDetails show
+
+DirText "选择安装位置" "请选择班主任工具箱的安装目录。你可以使用默认目录，也可以点击“浏览”选择其他位置。" "安装目录："
 
 !define MUI_ABORTWARNING
 !define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
@@ -41,6 +44,7 @@ Section "主程序" SEC_MAIN
   SetOutPath "$INSTDIR"
   File "..\dist\${APP_EXE}"
 
+  ; AI 配置放到用户目录，避免安装到 Program Files 等受保护路径后无法写入。
   CreateDirectory "$APPDATA\ClassTeacherToolbox"
   SetOutPath "$APPDATA\ClassTeacherToolbox"
   File "/oname=ai.example.json" "..\config\ai.example.json"

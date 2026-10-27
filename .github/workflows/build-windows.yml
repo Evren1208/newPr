@@ -28,9 +28,17 @@ jobs:
       - name: Build executable
         run: pyinstaller --noconfirm --clean --onefile --windowed --name ClassTeacherToolbox --collect-all pptx --collect-all docx main.py
 
+      - name: Prepare package
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist/config | Out-Null
+          Copy-Item config/ai.example.json dist/config/ai.example.json
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ClassTeacherToolbox-Windows
-          path: dist/ClassTeacherToolbox.exe
+          path: |
+            dist/ClassTeacherToolbox.exe
+            dist/config/ai.example.json
           if-no-files-found: error

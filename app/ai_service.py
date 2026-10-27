@@ -68,6 +68,21 @@ def _project_root() -> Path:
     return Path(__file__).resolve().parents[1]
 
 
+def _user_config_dir() -> Path:
+    appdata = os.getenv("APPDATA", "").strip()
+    if appdata:
+        return Path(appdata) / "ClassTeacherToolbox"
+    return Path.home() / ".class_teacher_toolbox"
+
+
+def _config_candidates() -> list[Path]:
+    # Installed builds prefer a writable per-user config directory.
+    # Development builds may still use project-local config/ai.json.
+    candidates = [_user_config_dir() / "ai.json"]
+    candidates.append(_project_root() / "config" / "ai.json")
+    return candidates
+
+
 def load_ai_config() -> Dict:
     env_key = os.getenv("TEACHER_AI_API_KEY", "").strip()
     if env_key:
@@ -78,12 +93,12 @@ def load_ai_config() -> Dict:
             "model": os.getenv("TEACHER_AI_MODEL", "").strip(),
         }
 
-    cfg = _project_root() / "config" / "ai.json"
-    if cfg.exists():
-        try:
-            return json.loads(cfg.read_text(encoding="utf-8"))
-        except Exception:
-            return {"enabled": False}
+    for cfg in _config_candidates():
+        if cfg.exists():
+            try:
+                return json.loads(cfg.read_text(encoding="utf-8"))
+            except Exception:
+                return {"enabled": False}
     return {"enabled": False}
 
 
